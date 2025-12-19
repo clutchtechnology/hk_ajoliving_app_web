@@ -1,0 +1,65 @@
+name: hk_ajoliving_app_web
+description: AJO Living 房产服务平台 Flutter Web 应用
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # 国际化
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  
+  # 状态管理
+  flutter_riverpod: ^2.4.0
+  
+  # 路由管理
+  go_router: ^12.0.0
+  
+  # 网络请求
+  dio: ^5.4.0
+  
+  # 本地存储
+  shared_preferences: ^2.2.2
+  
+  # JSON 序列化
+  json_annotation: ^4.8.1
+  
+  # 其他工具
+  cached_network_image: ^3.3.0
+  flutter_svg: ^2.0.9
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  # 代码生成
+  build_runner: ^2.4.6
+  json_serializable: ^6.7.1
+  
+  # 代码规范
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  
+  # 启用国际化代码生成
+  generate: true
+  
+  # 资源配置
+  assets:
+    - assets/images/
+    - assets/icons/
+  
+  # 字体配置（按需添加）
+  # fonts:
+  #   - family: NotoSansHK
+  #     fonts:
+  #       - asset: assets/fonts/NotoSansHK-Regular.ttf
+  #       - asset: assets/fonts/NotoSansHK-Bold.ttf
+  #         weight: 700

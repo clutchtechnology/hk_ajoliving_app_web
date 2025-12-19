@@ -1,0 +1,17 @@
+{
+  "@@locale": "en",
+  "appName": "AJO Living",
+  "home": "Home",
+  "buy": "Buy",
+  "rent": "Rent",
+  "newProperties": "New Properties",
+  "servicedApartments": "Serviced Apartments",
+  "transactions": "Transactions",
+  "valuation": "Valuation",
+  "furniture": "Furniture",
+  "mortgage": "Mortgage",
+  "news": "News",
+  "schoolNet": "School Net",
+  "agents": "Agents",
+  "priceIndex": "Price Index"
+}
