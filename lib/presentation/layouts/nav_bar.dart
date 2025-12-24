@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_styles.dart';
+import '../providers/auth_provider.dart';
 
 /// 顶部导航栏组件
-class NavBar extends StatefulWidget {
+class NavBar extends ConsumerStatefulWidget {
   const NavBar({super.key});
 
   @override
-  State<NavBar> createState() => _NavBarState();
+  ConsumerState<NavBar> createState() => _NavBarState();
 }
 
-class _NavBarState extends State<NavBar> {
+class _NavBarState extends ConsumerState<NavBar> {
   String? _hoveredItem;
 
   // 导航菜单项列表
@@ -148,9 +150,10 @@ class _NavBarState extends State<NavBar> {
 
   /// 构建用户区域（用户信息 + 购物车）
   Widget _buildUserSection() {
-    // TODO: 从状态管理中获取用户登录状态
-    final bool isLoggedIn = false;
-    final String? userName = null;
+    // 从 Riverpod 获取用户登录状态
+    final authState = ref.watch(authProvider);
+    final bool isLoggedIn = authState.isLoggedIn;
+    final String? userName = authState.user?.displayName;
     final int cartItemCount = 0;
 
     return Row(
@@ -227,22 +230,25 @@ class _NavBarState extends State<NavBar> {
           vertical: AppStyles.spacing8,
         ),
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.border),
+          color: isLoggedIn ? AppColors.primary.withOpacity(0.1) : null,
+          border: Border.all(
+            color: isLoggedIn ? AppColors.primary : AppColors.border,
+          ),
           borderRadius: BorderRadius.circular(AppStyles.radiusMedium),
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.person_outline,
-              color: AppColors.textPrimary,
+            Icon(
+              isLoggedIn ? Icons.account_circle : Icons.person_outline,
+              color: isLoggedIn ? AppColors.primary : AppColors.textPrimary,
               size: 20,
             ),
             const SizedBox(width: AppStyles.spacing8),
             Text(
-              isLoggedIn ? (userName ?? '用戶') : '登入',
-              style: const TextStyle(
+              isLoggedIn ? (userName ?? '個人中心') : '登入',
+              style: TextStyle(
                 fontSize: AppStyles.fontSizeBody,
-                color: AppColors.textPrimary,
+                color: isLoggedIn ? AppColors.primary : AppColors.textPrimary,
                 fontWeight: FontWeight.w500,
               ),
             ),

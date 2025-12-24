@@ -1,0 +1,17 @@
+{
+  "@@locale": "zh",
+  "appName": "AJO Living",
+  "home": "地產主頁",
+  "buy": "買樓",
+  "rent": "租屋",
+  "newProperties": "新盤",
+  "servicedApartments": "服務式住宅",
+  "transactions": "屋苑成交",
+  "valuation": "物業估價",
+  "furniture": "家具",
+  "mortgage": "置業按揭",
+  "news": "新聞資訊",
+  "schoolNet": "校網",
+  "agents": "地產代理",
+  "priceIndex": "易發樓價指數"
+}

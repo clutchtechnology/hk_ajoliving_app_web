@@ -59,20 +59,23 @@ lib/
 │   │   ├── auth_provider.dart
 │   │   ├── property_provider.dart
 │   │   └── filter_provider.dart
-│   ├── pages/                   # 页面
-│   │   ├── home/                # 首页
-│   │   ├── search/              # 搜索页
-│   │   ├── property_detail/     # 房产详情页
-│   │   ├── rent/                # 租房页面
-│   │   ├── buy/                 # 买房页面
-│   │   ├── sell/                # 卖房页面
-│   │   ├── auth/                # 认证页面
-│   │   ├── profile/             # 个人中心
-│   │   └── favorites/           # 收藏页面
-│   ├── widgets/                 # 通用组件
-│   │   ├── common/              # 通用组件
-│   │   ├── property/            # 房产相关组件
-│   │   └── forms/               # 表单组件
+├── pages/                   # 页面（所有页面文件直接放在此目录，无子文件夹）
+│   ├── home_page.dart           # 首页
+│   ├── search_page.dart         # 搜索页
+│   ├── property_detail_page.dart# 房产详情页
+│   ├── rent_page.dart           # 租房页面
+│   ├── buy_page.dart            # 买房页面
+│   ├── sell_page.dart           # 卖房页面
+│   ├── auth_page.dart           # 认证页面
+│   ├── profile_page.dart        # 个人中心
+│   ├── favorites_page.dart      # 收藏页面
+│   ├── ...                      # 其他页面
+│
+├── widgets/                 # 通用组件（所有组件直接放在此目录，无子文件夹）
+│   ├── nav_bar.dart             # 导航栏组件
+│   ├── property_card.dart       # 房产卡片组件
+│   ├── search_bar.dart          # 搜索栏组件
+│   ├── ...                      # 其他组件
 │   └── layouts/                 # 布局组件
 │       ├── main_layout.dart     # 主布局
 │       ├── responsive_layout.dart

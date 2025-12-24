@@ -33,6 +33,7 @@ dependencies:
   # 其他工具
   cached_network_image: ^3.3.0
   flutter_svg: ^2.0.9
+  fl_chart: ^1.1.1
 
 dev_dependencies:
   flutter_test:

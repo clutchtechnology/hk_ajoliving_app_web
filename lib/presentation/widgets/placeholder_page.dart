@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../core/constants/app_colors.dart';
 
-/// 通用占位页面
+/// 占位页面组件
 class PlaceholderPage extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -8,7 +9,7 @@ class PlaceholderPage extends StatelessWidget {
   const PlaceholderPage({
     super.key,
     required this.title,
-    this.icon = Icons.construction,
+    required this.icon,
   });
 
   @override
@@ -22,7 +23,7 @@ class PlaceholderPage extends StatelessWidget {
             Icon(
               icon,
               size: 64,
-              color: Colors.blue,
+              color: AppColors.primary,
             ),
             const SizedBox(height: 24),
             Text(
@@ -30,6 +31,7 @@ class PlaceholderPage extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 16),
@@ -37,7 +39,7 @@ class PlaceholderPage extends StatelessWidget {
               '頁面內容待實現',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey,
+                color: AppColors.textSecondary,
               ),
             ),
           ],

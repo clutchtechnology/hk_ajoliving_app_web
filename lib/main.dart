@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 
 void main() async {
@@ -8,5 +9,9 @@ void main() async {
   // TODO: 初始化依赖注入
   // TODO: 初始化本地存储
 
-  runApp(const App());
+  runApp(
+    const ProviderScope(
+      child: App(),
+    ),
+  );
 }
