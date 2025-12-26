@@ -219,11 +219,12 @@ class HomePage extends StatelessWidget {
                             child: GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 4,
                                 crossAxisSpacing: AppStyles.spacing12,
                                 mainAxisSpacing: AppStyles.spacing12,
-                                childAspectRatio: 1.0,
+                                // 子项宽高比（宽/高）。若希望高度=宽度*1.75，则比例=1/1.75
+                                childAspectRatio: 1 / 1.25,
                               ),
                               itemCount: 12,
                               itemBuilder: (context, index) {

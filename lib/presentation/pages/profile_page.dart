@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../providers/auth_provider.dart';
+import '../../core/constants/app_colors.dart';
+import '../providers/auth_provider.dart';
 
 /// 个人中心页面
 class ProfilePage extends ConsumerStatefulWidget {
@@ -628,10 +628,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   child: const Text('取消'),
                 ),
                 TextButton(
-                  onPressed: () {
-                    ref.read(authProvider.notifier).logout();
-                    Navigator.pop(context);
-                    context.go('/');
+                  onPressed: () async {
+                    await ref.read(authProvider.notifier).logout();
+                    if (mounted) {
+                      Navigator.pop(context);
+                      context.go('/');
+                    }
                   },
                   child: const Text(
                     '登出',

@@ -1,43 +1,39 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_styles.dart';
 
-/// 房源卡片数据模型
-class PropertyCardData {
+/// 家具卡片数据模型
+class FurnitureCardData {
   final String imageUrl;
-  final String title;
-  final String district;
-  final String estate;
-  final String location; // 例如: "6座 低層 C室"
-  final double area; // 平方尺
-  final String propertyType; // 物业类型
-  final List<String> tags; // 标签，例如: ['4 房', '3 浴室', '近地鐵站', '私人屋苑']
-  final double price;
-  final String? priceUnit; // 例如: "万", "元/月"
+  final String title; // 家具标题
+  final String description; // 家具详情描述
+  final String location; // 位置信息，例如: "銅鑼灣店"
+  final List<String> tags; // 标签，例如: ['實木', '北歐風', '現貨', '包送貨']
+  final double price; // 价格
+  final String? priceUnit; // 例如: "元"
   final bool isFavorite;
   final VoidCallback? onFavoritePressed;
   final VoidCallback? onTap;
 
-  PropertyCardData({
+  FurnitureCardData({
     required this.imageUrl,
     required this.title,
-    required this.district,
-    required this.estate,
+    required this.description,
     required this.location,
-    required this.area,
-    required this.propertyType,
     required this.tags,
     required this.price,
-    this.priceUnit = "万",
+    this.priceUnit = "元",
     this.isFavorite = false,
     this.onFavoritePressed,
     this.onTap,
   });
 }
 
-/// 房源列表卡片组件
-class PropertyListItem extends StatelessWidget {
-  final PropertyCardData data;
-  const PropertyListItem({
+/// 家具列表卡片组件
+class FurnitureCard extends StatelessWidget {
+  final FurnitureCardData data;
+  
+  const FurnitureCard({
     super.key,
     required this.data,
   });
@@ -83,17 +79,14 @@ class PropertyListItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 标题和收藏按钮
+                // 标题和价格行
                 _buildTitleRow(context),
                 const SizedBox(height: 8),
-                // 地区和小区
+                // 详情描述
+                _buildDescription(),
+                const SizedBox(height: 6),
+                // 位置信息
                 _buildLocationInfo(),
-                const SizedBox(height: 6),
-                // 具体位置
-                _buildDetailLocation(),
-                const SizedBox(height: 6),
-                // 面积和物业
-                _buildAreaAndType(),
                 const SizedBox(height: 8),
                 // 标签
                 _buildTags(),
@@ -177,40 +170,44 @@ class PropertyListItem extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        // 价格显示在右侧
+        // 价格显示在右侧（与房产卡片相同位置）
         Padding(
           padding: const EdgeInsets.only(top: 4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                "${data.price.toStringAsFixed(1)}${data.priceUnit}",
+                "HK\$ ${data.price.toStringAsFixed(0)}",
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: AppColors.primary,
                 ),
               ),
-              if (data.priceUnit == "元/月")
-                const Text(
-                  "租金",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                )
-              else
-                const Text(
-                  "售价",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
+              Text(
+                data.priceUnit ?? "元",
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
                 ),
+              ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDescription() {
+    return Text(
+      data.description,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: const TextStyle(
+        fontSize: 13,
+        color: AppColors.textSecondary,
+        height: 1.4,
+      ),
     );
   }
 
@@ -222,35 +219,7 @@ class PropertyListItem extends StatelessWidget {
         const SizedBox(width: 4),
         Expanded(
           child: Text(
-            "${data.district} · ${data.estate}",
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDetailLocation() {
-    return Text(
-      data.location,
-      style: const TextStyle(
-        fontSize: 12,
-        color: Color(0xFF999999),
-      ),
-    );
-  }
-
-  Widget _buildAreaAndType() {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            "${data.area.toStringAsFixed(0)} 呎 · ${data.propertyType}",
+            data.location,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(

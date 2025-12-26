@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../widgets/buy_filter_panel.dart';
 import '../widgets/ad_rent_card.dart';
-import '../widgets/property_list_item.dart';
+import '../widgets/estate_transaction_card.dart';
 
 /// 屋苑成交页面
 class TransactionsPage extends StatefulWidget {
@@ -98,8 +98,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemBuilder: (context, index) {
-                                  return PropertyListItem(
-                                    child: Text('房源信息 #${index + 1}', style: const TextStyle(fontSize: 16)),
+                                  return EstateTransactionCard(
+                                    data: EstateTransactionCardData(
+                                      imageUrl: 'https://via.placeholder.com/140',
+                                      estateName: '港灣中心 #${index + 1}',
+                                      transactionCount: 12 + index,
+                                      listingCount: 8 + index,
+                                      rentalCount: 5 + index,
+                                      avgPrice: 1450 + (index * 120).toDouble(),
+                                    ),
                                   );
                                 },
                               ),

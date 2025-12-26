@@ -83,6 +83,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
+          color: AppColors.surface,
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Form(

@@ -111,7 +111,18 @@ class _ServicedApartmentsPageState extends State<ServicedApartmentsPage> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemBuilder: (context, index) {
                                   return PropertyListItem(
-                                    child: Text('房源信息 #${index + 1}', style: const TextStyle(fontSize: 16)),
+                                    data: PropertyCardData(
+                                      imageUrl: 'https://via.placeholder.com/140',
+                                      title: '服務式公寓 #${index + 1}',
+                                      district: '中環',
+                                      estate: '服務式公寓',
+                                      location: '高層 景觀房',
+                                      area: 550,
+                                      propertyType: '服務式公寓',
+                                      tags: ['1 房', '1 浴室', '家具齊全', '短租'],
+                                      price: 12000 + (index * 800).toDouble(),
+                                      priceUnit: '元/月',
+                                    ),
                                   );
                                 },
                               ),

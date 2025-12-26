@@ -168,17 +168,17 @@ class _NavBarState extends ConsumerState<NavBar> {
     );
   }
 
-  /// 构建购物车按钮
+  /// 构建收藏按钮
   Widget _buildCartButton(int itemCount) {
     return InkWell(
-      onTap: () => context.go('/cart'),
+      onTap: () => context.go('/favorites'),
       child: Container(
         padding: const EdgeInsets.all(AppStyles.spacing8),
         child: Stack(
           clipBehavior: Clip.none,
           children: [
             const Icon(
-              Icons.shopping_cart_outlined,
+              Icons.favorite_border,
               color: AppColors.textPrimary,
               size: 24,
             ),

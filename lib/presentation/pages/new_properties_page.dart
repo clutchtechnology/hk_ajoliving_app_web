@@ -96,7 +96,18 @@ class _NewPropertiesPageState extends State<NewPropertiesPage> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemBuilder: (context, index) {
                                   return PropertyListItem(
-                                    child: Text('房源信息 #${index + 1}', style: const TextStyle(fontSize: 16)),
+                                    data: PropertyCardData(
+                                      imageUrl: 'https://via.placeholder.com/140',
+                                      title: '新盤豪華項目 #${index + 1}',
+                                      district: '港島東',
+                                      estate: '新盤發展',
+                                      location: 'A座 高層',
+                                      area: 850,
+                                      propertyType: '新盤',
+                                      tags: ['5 房', '2 浴室', '海景', '新盤'],
+                                      price: 1850 + (index * 150).toDouble(),
+                                      priceUnit: '万',
+                                    ),
                                   );
                                 },
                               ),

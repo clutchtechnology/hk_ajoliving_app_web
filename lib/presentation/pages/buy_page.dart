@@ -100,7 +100,18 @@ class _BuyPageState extends State<BuyPage> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemBuilder: (context, index) {
                                   return PropertyListItem(
-                                    child: Text('房源信息 #${index + 1}', style: const TextStyle(fontSize: 16)),
+                                    data: PropertyCardData(
+                                      imageUrl: 'https://via.placeholder.com/140',
+                                      title: '尖沙咀高級海景豪宅 #${index + 1}',
+                                      district: '九龍城',
+                                      estate: '淘大商場',
+                                      location: '6座 低層 C室',
+                                      area: 700,
+                                      propertyType: '住宅',
+                                      tags: ['4 房', '3 浴室', '近地鐵站', '私人屋苑'],
+                                      price: 1250 + (index * 100).toDouble(),
+                                      priceUnit: '万',
+                                    ),
                                   );
                                 },
                               ),
