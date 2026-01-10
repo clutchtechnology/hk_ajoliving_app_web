@@ -26,11 +26,12 @@ class _NavBarState extends ConsumerState<NavBar> {
     const NavMenuItem(label: '屋苑成交', route: '/transactions'),
     const NavMenuItem(label: '物業估價', route: '/valuation'),
     const NavMenuItem(label: '家具', route: '/furniture'),
-    const NavMenuItem(label: '置業按揭', route: '/mortgage'),
-    const NavMenuItem(label: '新聞資訊', route: '/news'),
+    // TODO: 以下菜单项暂时隐藏，待页面内容完善后启用
+    // const NavMenuItem(label: '置業按揭', route: '/mortgage'),
+    // const NavMenuItem(label: '新聞資訊', route: '/news'),
     const NavMenuItem(label: '校網', route: '/school-net'),
     const NavMenuItem(label: '地產代理', route: '/agents'),
-    const NavMenuItem(label: '易發樓價指數', route: '/price-index'),
+    // const NavMenuItem(label: '易發樓價指數', route: '/price-index'),
   ];
 
   @override

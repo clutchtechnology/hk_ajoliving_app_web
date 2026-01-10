@@ -1,21 +1,36 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_styles.dart';
+import '../../data/models/property.dart';
 
 /// 房源卡片组件
 class PropertyCard extends StatelessWidget {
   const PropertyCard({
     super.key,
+    this.property,
     this.estateName = '示例屋苑',
     this.areaSqft,
     this.price,
     this.imageUrl,
   });
 
+  final Property? property;
   final String estateName;
   final double? areaSqft; // 面积（平方尺）
   final String? price; // 售价文案，如 "HK$ 8,800,000"
   final String? imageUrl;
+  
+  // 获取屋苑名称
+  String get _estateName => property?.title ?? estateName;
+  
+  // 获取面积
+  double? get _areaSqft => property?.area ?? areaSqft;
+  
+  // 获取价格
+  String get _price => property?.formattedPrice ?? price ?? '價格待定';
+  
+  // 获取图片URL
+  String? get _imageUrl => property?.imageUrl ?? imageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -48,47 +63,53 @@ class PropertyCard extends StatelessWidget {
                   // 下半部分信息区域
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppStyles.spacing12,
-                        AppStyles.spacing8, // 减小上内边距以贴近图片
-                        AppStyles.spacing12,
-                        AppStyles.spacing12,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                      padding: const EdgeInsets.all(AppStyles.spacing12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // 左侧：屋苑名 + 面积
+                          // 上部分：标题区域（占 2/3）
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Text(
-                                  estateName,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: AppStyles.fontSizeH3,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
-                                  ),
+                            flex: 2,
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                _estateName,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: AppStyles.fontSizeBody,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                  height: 1.3,
                                 ),
-                                const SizedBox(height: AppStyles.spacing4),
-                                Text(
-                                  areaSqft != null
-                                      ? '${areaSqft!.toStringAsFixed(0)} 平方尺'
-                                      : '— 平方尺',
-                                  style: const TextStyle(
-                                    fontSize: AppStyles.fontSizeCaption,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           ),
 
-                          // 右下角：售价绿色徽标
-                          _buildPriceBadge(),
+                          // 下部分：面积和价格（占 1/3）
+                          Expanded(
+                            flex: 1,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                // 左侧：面积
+                                Expanded(
+                                  child: Text(
+                                    _areaSqft != null
+                                        ? '${_areaSqft!.toStringAsFixed(0)} 尺'
+                                        : '— 尺',
+                                    style: const TextStyle(
+                                      fontSize: AppStyles.fontSizeCaption,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+
+                                // 右侧：价格徽标
+                                _buildPriceBadge(),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -104,7 +125,7 @@ class PropertyCard extends StatelessWidget {
 
   // 图片占位：没有资源时先显示灰色占位 + 图标
   Widget _buildImagePlaceholder() {
-    if (imageUrl == null || imageUrl!.isEmpty) {
+    if (_imageUrl == null || _imageUrl!.isEmpty) {
       return Container(
         decoration: BoxDecoration(
           color: AppColors.divider,
@@ -128,26 +149,36 @@ class PropertyCard extends StatelessWidget {
       );
     }
 
-    // 预留图片显示逻辑（未来替换为网络图片）
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.divider,
-      ),
-      child: const Center(
-        child: Text(
-          '圖片載入中...',
-          style: TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: AppStyles.fontSizeSmall,
+    // 显示网络图片
+    return Image.network(
+      _imageUrl!,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.divider,
           ),
-        ),
-      ),
+          child: const Center(
+            child: Icon(Icons.broken_image, color: AppColors.textTertiary, size: 36),
+          ),
+        );
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.divider,
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
     );
   }
 
   // 售价徽标：右下角绿色背景、白色文字
   Widget _buildPriceBadge() {
-    final String text = price ?? '價格待定';
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppStyles.spacing12,
@@ -158,7 +189,7 @@ class PropertyCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppStyles.radiusMedium),
       ),
       child: Text(
-        text,
+        _price,
         style: const TextStyle(
           color: Colors.white,
           fontSize: AppStyles.fontSizeCaption,

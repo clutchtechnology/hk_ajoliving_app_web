@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../widgets/buy_filter_panel.dart';
 import '../widgets/ad_rent_card.dart';
 import '../widgets/property_list_item.dart';
+import '../providers/property_provider.dart';
 
 /// 买楼页面
-class BuyPage extends StatefulWidget {
+class BuyPage extends ConsumerStatefulWidget {
   const BuyPage({super.key});
 
   @override
-  State<BuyPage> createState() => _BuyPageState();
+  ConsumerState<BuyPage> createState() => _BuyPageState();
 }
 
-class _BuyPageState extends State<BuyPage> {
+class _BuyPageState extends ConsumerState<BuyPage> {
   // 筛选选项状态
   String _selectedRegion = '不限';
   String _selectedCategory = '不限';
@@ -24,7 +26,18 @@ class _BuyPageState extends State<BuyPage> {
   final Set<String> _selectedMoreOptions = {};
 
   @override
+  void initState() {
+    super.initState();
+    // 页面加载时获取房源数据
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(buyPropertyProvider.notifier).loadProperties();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final buyPropertyState = ref.watch(buyPropertyProvider);
+    
     // 最大宽度与home页保持一致
     const double maxLeftWidth = 1100.0;
     const double maxRightWidth = 600.0;
@@ -91,69 +104,182 @@ class _BuyPageState extends State<BuyPage> {
                             }),
                           ),
                           // 房源列表区域
-                          // 动态高度房源列表区域
-                          Column(
-                            children: [
-                              ListView.builder(
-                                itemCount: 10,
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemBuilder: (context, index) {
-                                  return PropertyListItem(
-                                    data: PropertyCardData(
-                                      imageUrl: 'https://via.placeholder.com/140',
-                                      title: '尖沙咀高級海景豪宅 #${index + 1}',
-                                      district: '九龍城',
-                                      estate: '淘大商場',
-                                      location: '6座 低層 C室',
-                                      area: 700,
-                                      propertyType: '住宅',
-                                      tags: ['4 房', '3 浴室', '近地鐵站', '私人屋苑'],
-                                      price: 1250 + (index * 100).toDouble(),
-                                      priceUnit: '万',
-                                    ),
-                                  );
-                                },
+                          if (buyPropertyState.isLoading)
+                            const Padding(
+                              padding: EdgeInsets.all(48.0),
+                              child: Center(
+                                child: CircularProgressIndicator(),
                               ),
-                              // 页码选择器
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: List.generate(5, (i) {
-                                    final isActive = i == 0;
-                                    return Container(
-                                      width: 36,
-                                      height: 36,
-                                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                                      decoration: BoxDecoration(
-                                        color: isActive ? AppColors.primary : AppColors.background,
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: isActive ? AppColors.primary : AppColors.border,
-                                        ),
-                                      ),
-                                      child: TextButton(
-                                        onPressed: () {},
-                                        style: TextButton.styleFrom(
-                                          padding: EdgeInsets.zero,
-                                          minimumSize: Size.zero,
-                                        ),
-                                        child: Text(
-                                          (i + 1).toString(),
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: isActive ? Colors.white : AppColors.textSecondary,
-                                            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }),
+                            )
+                          else if (buyPropertyState.error != null)
+                            Padding(
+                              padding: const EdgeInsets.all(48.0),
+                              child: Center(
+                                child: Column(
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline,
+                                      size: 48,
+                                      color: AppColors.error,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      '加載失敗：${buyPropertyState.error}',
+                                      style: const TextStyle(color: AppColors.textSecondary),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        ref.read(buyPropertyProvider.notifier).loadProperties();
+                                      },
+                                      child: const Text('重試'),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                            )
+                          else if (buyPropertyState.response == null || 
+                                   buyPropertyState.response!.properties.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.all(48.0),
+                              child: Center(
+                                child: Text(
+                                  '暫無符合條件的房源',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            )
+                          else
+                            Column(
+                              children: [
+                                // 房源列表
+                                ListView.builder(
+                                  itemCount: buyPropertyState.response!.properties.length,
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemBuilder: (context, index) {
+                                    final property = buyPropertyState.response!.properties[index];
+                                    return PropertyListItem(
+                                      data: PropertyCardData(
+                                        imageUrl: property.coverImage ?? 'https://via.placeholder.com/140',
+                                        title: property.title,
+                                        district: property.district?.nameZh ?? '',
+                                        estate: property.buildingName ?? '',
+                                        location: property.address,
+                                        area: property.area,
+                                        propertyType: property.propertyType,
+                                        tags: [
+                                          '${property.bedrooms} 房',
+                                          if (property.bathrooms != null) '${property.bathrooms} 浴室',
+                                        ],
+                                        price: property.price / 10000, // 转换为万元
+                                        priceUnit: '万',
+                                      ),
+                                    );
+                                  },
+                                ),
+                                // 页码选择器
+                                if (buyPropertyState.response!.totalPages > 1)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        // 上一页按钮
+                                        Container(
+                                          width: 36,
+                                          height: 36,
+                                          decoration: BoxDecoration(
+                                            color: AppColors.background,
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: AppColors.border),
+                                          ),
+                                          child: IconButton(
+                                            padding: EdgeInsets.zero,
+                                            icon: const Icon(Icons.chevron_left, size: 20),
+                                            color: buyPropertyState.filter.page > 1 
+                                                ? AppColors.textPrimary 
+                                                : AppColors.textTertiary,
+                                            onPressed: buyPropertyState.filter.page > 1
+                                                ? () {
+                                                    ref.read(buyPropertyProvider.notifier)
+                                                        .changePage(buyPropertyState.filter.page - 1);
+                                                  }
+                                                : null,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        // 页码按钮
+                                        ...List.generate(
+                                          buyPropertyState.response!.totalPages > 5 
+                                              ? 5 
+                                              : buyPropertyState.response!.totalPages,
+                                          (i) {
+                                            final page = i + 1;
+                                            final isActive = page == buyPropertyState.filter.page;
+                                            return Container(
+                                              width: 36,
+                                              height: 36,
+                                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                                              decoration: BoxDecoration(
+                                                color: isActive ? AppColors.primary : AppColors.background,
+                                                borderRadius: BorderRadius.circular(8),
+                                                border: Border.all(
+                                                  color: isActive ? AppColors.primary : AppColors.border,
+                                                ),
+                                              ),
+                                              child: TextButton(
+                                                onPressed: () {
+                                                  ref.read(buyPropertyProvider.notifier).changePage(page);
+                                                },
+                                                style: TextButton.styleFrom(
+                                                  padding: EdgeInsets.zero,
+                                                  minimumSize: Size.zero,
+                                                ),
+                                                child: Text(
+                                                  page.toString(),
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: isActive ? Colors.white : AppColors.textSecondary,
+                                                    fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                        const SizedBox(width: 8),
+                                        // 下一页按钮
+                                        Container(
+                                          width: 36,
+                                          height: 36,
+                                          decoration: BoxDecoration(
+                                            color: AppColors.background,
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: AppColors.border),
+                                          ),
+                                          child: IconButton(
+                                            padding: EdgeInsets.zero,
+                                            icon: const Icon(Icons.chevron_right, size: 20),
+                                            color: buyPropertyState.response!.hasMore
+                                                ? AppColors.textPrimary
+                                                : AppColors.textTertiary,
+                                            onPressed: buyPropertyState.response!.hasMore
+                                                ? () {
+                                                    ref.read(buyPropertyProvider.notifier)
+                                                        .changePage(buyPropertyState.filter.page + 1);
+                                                  }
+                                                : null,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
                         ],
                       ),
                     ),

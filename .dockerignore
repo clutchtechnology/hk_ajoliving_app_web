@@ -1,0 +1,68 @@
+# Flutter/Dart 相关
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+.metadata
+
+# IDE 相关
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git 相关
+.git/
+.gitignore
+.gitattributes
+
+# 文档和说明
+*.md
+README.md
+CHANGELOG.md
+LICENSE
+docs/
+
+# 测试相关
+test/
+coverage/
+.test_coverage/
+
+# CI/CD 相关
+.github/
+.gitlab-ci.yml
+azure-pipelines.yml
+
+# 临时文件
+*.log
+*.tmp
+*.temp
+.env
+.env.local
+.env.*.local
+
+# 依赖管理
+pubspec.lock
+
+# Web 构建产物（避免重复）
+web/
+
+# Android/iOS 相关（Web 项目不需要）
+android/
+ios/
+macos/
+linux/
+windows/
+
+# Node modules（如果有）
+node_modules/
+
+# 其他
+*.iml
+.gradle/
+local.properties

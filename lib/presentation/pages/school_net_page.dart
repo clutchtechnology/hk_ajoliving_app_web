@@ -1,122 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/school_net_provider.dart';
 
-class SchoolNetPage extends StatefulWidget {
+class SchoolNetPage extends ConsumerStatefulWidget {
   const SchoolNetPage({super.key});
 
   @override
-  State<SchoolNetPage> createState() => _SchoolNetPageState();
+  ConsumerState<SchoolNetPage> createState() => _SchoolNetPageState();
 }
 
-class _SchoolNetPageState extends State<SchoolNetPage> {
-  // 筛选器状态
-  String? selectedDistrict;
-  String? selectedGender;
-  String? selectedFinanceType;
+class _SchoolNetPageState extends ConsumerState<SchoolNetPage> {
+  final TextEditingController _searchController = TextEditingController();
+  String? selectedType;
   
-  // 分页状态
-  int currentPage = 1;
-  final int itemsPerPage = 10;
-  
-  // 地区选项
-  final List<String> districts = [
-    '全部地區',
-    '中西區',
-    '灣仔區',
-    '東區',
-    '南區',
-    '油尖旺區',
-    '深水埗區',
-    '九龍城區',
-    '黃大仙區',
-    '觀塘區',
-    '葵青區',
-    '荃灣區',
-    '屯門區',
-    '元朗區',
-    '北區',
-    '大埔區',
-    '沙田區',
-    '西貢區',
-    '離島區',
-  ];
-  
-  // 性别选项
-  final List<String> genders = [
-    '全部',
-    '男女',
-    '男',
-    '女',
-  ];
-  
-  // 资助种类选项
-  final List<String> financeTypes = [
-    '全部',
-    '官立',
-    '資助',
-    '直資',
-    '私立',
-  ];
-  
-  // 模拟学校数据
-  final List<Map<String, String>> schools = [
-    {'name': '聖保羅男女中學', 'district': '中西區', 'gender': '男女', 'financeType': '直資'},
-    {'name': '拔萃女書院', 'district': '油尖旺區', 'gender': '女', 'financeType': '直資'},
-    {'name': '皇仁書院', 'district': '灣仔區', 'gender': '男', 'financeType': '官立'},
-    {'name': '嘉諾撒聖心書院', 'district': '南區', 'gender': '女', 'financeType': '資助'},
-    {'name': '喇沙書院', 'district': '九龍城區', 'gender': '男', 'financeType': '資助'},
-    {'name': '協恩中學', 'district': '九龍城區', 'gender': '女', 'financeType': '資助'},
-    {'name': '華仁書院（九龍）', 'district': '油尖旺區', 'gender': '男', 'financeType': '資助'},
-    {'name': '庇理羅士女子中學', 'district': '東區', 'gender': '女', 'financeType': '官立'},
-    {'name': '英皇書院', 'district': '中西區', 'gender': '男', 'financeType': '官立'},
-    {'name': '瑪利諾修院學校', 'district': '九龍城區', 'gender': '女', 'financeType': '資助'},
-    {'name': '聖公會林護紀念中學', 'district': '葵青區', 'gender': '男女', 'financeType': '資助'},
-    {'name': '培正中學', 'district': '九龍城區', 'gender': '男女', 'financeType': '資助'},
-    {'name': '聖保祿學校', 'district': '灣仔區', 'gender': '女', 'financeType': '資助'},
-    {'name': '德望學校', 'district': '黃大仙區', 'gender': '女', 'financeType': '資助'},
-    {'name': '聖士提反女子中學', 'district': '中西區', 'gender': '女', 'financeType': '資助'},
-  ];
-  
-  // 获取筛选后的学校列表
-  List<Map<String, String>> get filteredSchools {
-    return schools.where((school) {
-      if (selectedDistrict != null && selectedDistrict != '全部地區' && school['district'] != selectedDistrict) {
-        return false;
-      }
-      if (selectedGender != null && selectedGender != '全部' && school['gender'] != selectedGender) {
-        return false;
-      }
-      if (selectedFinanceType != null && selectedFinanceType != '全部' && school['financeType'] != selectedFinanceType) {
-        return false;
-      }
-      return true;
-    }).toList();
+  @override
+  void initState() {
+    super.initState();
+    // 页面加载时自动获取数据
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(schoolNetProvider.notifier).loadSchoolNets();
+    });
   }
-  
-  // 获取当前页的数据
-  List<Map<String, String>> get currentPageData {
-    final startIndex = (currentPage - 1) * itemsPerPage;
-    final endIndex = startIndex + itemsPerPage;
-    final filtered = filteredSchools;
-    
-    if (startIndex >= filtered.length) {
-      return [];
-    }
-    
-    return filtered.sublist(
-      startIndex,
-      endIndex > filtered.length ? filtered.length : endIndex,
-    );
-  }
-  
-  // 获取总页数
-  int get totalPages {
-    final total = filteredSchools.length;
-    return (total / itemsPerPage).ceil();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     const double maxCardWidth = 1716.0;
+    final schoolNetState = ref.watch(schoolNetProvider);
 
     return Container(
       color: const Color(0xFFF8FAFC),
@@ -125,58 +40,58 @@ class _SchoolNetPageState extends State<SchoolNetPage> {
           constraints: const BoxConstraints(maxWidth: maxCardWidth),
           child: FractionallySizedBox(
             widthFactor: 0.8,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 标题区域
-                    Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: const Text(
-                        '校網查詢',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E293B),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 标题区域
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: const Text(
+                          '校網查詢',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1E293B),
+                          ),
                         ),
                       ),
-                    ),
-                    
-                    // 筛选器
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: _buildFilters(),
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // 表格
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: _buildTable(),
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // 分页器
-                    Padding(
-                      padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
-                      child: _buildPagination(),
-                    ),
-                  ],
+                      
+                      // 筛选器
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: _buildFilters(),
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // 内容区域
+                      _buildContent(schoolNetState),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // 分页器
+                      if (!schoolNetState.isLoading && schoolNetState.error == null && schoolNetState.schoolNets.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
+                          child: _buildPagination(schoolNetState),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -186,7 +101,103 @@ class _SchoolNetPageState extends State<SchoolNetPage> {
     );
   }
   
+  /// 内容区域（4状态渲染）
+  Widget _buildContent(SchoolNetState state) {
+    // 1. 加载中
+    if (state.isLoading) {
+      return Container(
+        padding: const EdgeInsets.all(48),
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator(),
+      );
+    }
+    
+    // 2. 错误状态
+    if (state.error != null) {
+      return Container(
+        padding: const EdgeInsets.all(48),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Color(0xFFEF4444),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '加載失敗',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              state.error!,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF64748B),
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () {
+                ref.read(schoolNetProvider.notifier).loadSchoolNets();
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('重試'),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    // 3. 空数据
+    if (state.schoolNets.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(48),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.school_outlined,
+              size: 64,
+              color: Color(0xFF94A3B8),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              '暫無校網數據',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '請嘗試調整篩選條件',
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFF64748B),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    // 4. 成功状态 - 显示表格
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: _buildTable(state),
+    );
+  }
+  
   Widget _buildFilters() {
+    final schoolNetState = ref.watch(schoolNetProvider);
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -198,96 +209,85 @@ class _SchoolNetPageState extends State<SchoolNetPage> {
         spacing: 16,
         runSpacing: 16,
         children: [
-          // 地区筛选
+          // 搜索框
           SizedBox(
-            width: 200,
-            child: DropdownButtonFormField<String>(
-              value: selectedDistrict,
-              decoration: const InputDecoration(
-                labelText: '地區',
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            width: 300,
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: '搜索校網',
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 filled: true,
                 fillColor: Colors.white,
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    ref.read(schoolNetProvider.notifier).search(_searchController.text);
+                  },
+                ),
               ),
-              items: districts.map((district) {
-                return DropdownMenuItem(
-                  value: district,
-                  child: Text(district),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedDistrict = value;
-                  currentPage = 1; // 重置页码
-                });
+              onSubmitted: (value) {
+                ref.read(schoolNetProvider.notifier).search(value);
               },
             ),
           ),
           
-          // 性别筛选
+          // 类型筛选
           SizedBox(
             width: 200,
             child: DropdownButtonFormField<String>(
-              value: selectedGender,
+              value: selectedType,
               decoration: const InputDecoration(
-                labelText: '性別',
+                labelText: '類型',
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 filled: true,
                 fillColor: Colors.white,
               ),
-              items: genders.map((gender) {
-                return DropdownMenuItem(
-                  value: gender,
-                  child: Text(gender),
-                );
-              }).toList(),
+              items: const [
+                DropdownMenuItem(value: null, child: Text('全部')),
+                DropdownMenuItem(value: 'primary', child: Text('小學')),
+                DropdownMenuItem(value: 'secondary', child: Text('中學')),
+              ],
               onChanged: (value) {
                 setState(() {
-                  selectedGender = value;
-                  currentPage = 1; // 重置页码
+                  selectedType = value;
                 });
+                ref.read(schoolNetProvider.notifier).updateType(value);
               },
             ),
           ),
           
-          // 资助种类筛选
-          SizedBox(
-            width: 200,
-            child: DropdownButtonFormField<String>(
-              value: selectedFinanceType,
-              decoration: const InputDecoration(
-                labelText: '資助種類',
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                filled: true,
-                fillColor: Colors.white,
-              ),
-              items: financeTypes.map((type) {
-                return DropdownMenuItem(
-                  value: type,
-                  child: Text(type),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedFinanceType = value;
-                  currentPage = 1; // 重置页码
-                });
-              },
-            ),
-          ),
+          // 地区筛选（暂时移除，等待地区 API 集成）
+          // SizedBox(
+          //   width: 200,
+          //   child: DropdownButtonFormField<int>(
+          //     value: schoolNetState.filter.districtId,
+          //     decoration: const InputDecoration(
+          //       labelText: '地區',
+          //       border: OutlineInputBorder(),
+          //       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          //       filled: true,
+          //       fillColor: Colors.white,
+          //     ),
+          //     items: const [
+          //       DropdownMenuItem(value: null, child: Text('全部地區')),
+          //     ],
+          //     onChanged: (value) {
+          //       ref.read(schoolNetProvider.notifier).updateDistrict(value);
+          //     },
+          //   ),
+          // ),
           
           // 重置按钮
           ElevatedButton.icon(
             onPressed: () {
               setState(() {
-                selectedDistrict = null;
-                selectedGender = null;
-                selectedFinanceType = null;
-                currentPage = 1;
+                selectedType = null;
+                _searchController.clear();
               });
+              ref.read(schoolNetProvider.notifier).clearFilter();
             },
             icon: const Icon(Icons.refresh),
             label: const Text('重置'),
@@ -300,22 +300,8 @@ class _SchoolNetPageState extends State<SchoolNetPage> {
     );
   }
   
-  Widget _buildTable() {
-    final data = currentPageData;
-    
-    if (data.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(48),
-        alignment: Alignment.center,
-        child: const Text(
-          '沒有符合條件的學校',
-          style: TextStyle(
-            fontSize: 16,
-            color: Color(0xFF64748B),
-          ),
-        ),
-      );
-    }
+  Widget _buildTable(SchoolNetState state) {
+    final schoolNets = state.schoolNets;
     
     return Container(
       decoration: BoxDecoration(
@@ -334,32 +320,34 @@ class _SchoolNetPageState extends State<SchoolNetPage> {
                 topRight: Radius.circular(8),
               ),
             ),
-            child: IntrinsicHeight(
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: _buildHeaderCell('學校名稱'),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: _buildHeaderCell('地區'),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: _buildHeaderCell('性別'),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: _buildHeaderCell('資助種類'),
-                  ),
-                ],
-              ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: _buildHeaderCell('校網編號'),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: _buildHeaderCell('校網名稱'),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: _buildHeaderCell('類型'),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: _buildHeaderCell('地區'),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: _buildHeaderCell('學校數'),
+                ),
+              ],
             ),
           ),
           // 数据行
-          ...List.generate(data.length, (index) {
-            final school = data[index];
+          ...List.generate(schoolNets.length, (index) {
+            final schoolNet = schoolNets[index];
             return Container(
               decoration: BoxDecoration(
                 color: index % 2 == 0 ? Colors.white : const Color(0xFFFAFAFA),
@@ -367,27 +355,29 @@ class _SchoolNetPageState extends State<SchoolNetPage> {
                   top: BorderSide(color: Color(0xFFE2E8F0)),
                 ),
               ),
-              child: IntrinsicHeight(
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: _buildDataCell(school['name']!),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: _buildDataCell(school['district']!),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: _buildDataCell(school['gender']!),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: _buildDataCell(school['financeType']!),
-                    ),
-                  ],
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: _buildDataCell(schoolNet.code),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: _buildDataCell(schoolNet.nameZhHant),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: _buildDataCell(schoolNet.typeText),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: _buildDataCell(schoolNet.district?.nameZh ?? '-'),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: _buildDataCell(schoolNet.schoolCount.toString()),
+                  ),
+                ],
               ),
             );
           }),
@@ -423,9 +413,18 @@ class _SchoolNetPageState extends State<SchoolNetPage> {
     );
   }
   
-  Widget _buildPagination() {
-    if (totalPages <= 1) {
+  Widget _buildPagination(SchoolNetState state) {
+    if (state.totalPages <= 1) {
       return const SizedBox.shrink();
+    }
+    
+    // 智能显示5个页码
+    int startPage = (state.currentPage - 2).clamp(1, state.totalPages);
+    int endPage = (startPage + 4).clamp(1, state.totalPages);
+    
+    // 如果结束页是最后一页，调整起始页
+    if (endPage == state.totalPages && endPage - startPage < 4) {
+      startPage = (endPage - 4).clamp(1, state.totalPages);
     }
     
     return Wrap(
@@ -435,44 +434,23 @@ class _SchoolNetPageState extends State<SchoolNetPage> {
       children: [
         // 上一页按钮
         IconButton(
-          onPressed: currentPage > 1
-              ? () {
-                  setState(() {
-                    currentPage--;
-                  });
-                }
+          onPressed: state.currentPage > 1
+              ? () => ref.read(schoolNetProvider.notifier).previousPage()
               : null,
           icon: const Icon(Icons.chevron_left),
           tooltip: '上一頁',
         ),
         
         // 页码按钮
-        ...List.generate(totalPages, (index) {
-          final pageNum = index + 1;
-          
-          // 只显示当前页附近的页码
-          if (pageNum == 1 ||
-              pageNum == totalPages ||
-              (pageNum >= currentPage - 2 && pageNum <= currentPage + 2)) {
-            return _buildPageButton(pageNum);
-          } else if (pageNum == currentPage - 3 || pageNum == currentPage + 3) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4),
-              child: Text('...'),
-            );
-          }
-          
-          return const SizedBox.shrink();
+        ...List.generate(endPage - startPage + 1, (index) {
+          final pageNum = startPage + index;
+          return _buildPageButton(pageNum, state.currentPage);
         }),
         
         // 下一页按钮
         IconButton(
-          onPressed: currentPage < totalPages
-              ? () {
-                  setState(() {
-                    currentPage++;
-                  });
-                }
+          onPressed: state.currentPage < state.totalPages
+              ? () => ref.read(schoolNetProvider.notifier).nextPage()
               : null,
           icon: const Icon(Icons.chevron_right),
           tooltip: '下一頁',
@@ -481,14 +459,12 @@ class _SchoolNetPageState extends State<SchoolNetPage> {
     );
   }
   
-  Widget _buildPageButton(int pageNum) {
+  Widget _buildPageButton(int pageNum, int currentPage) {
     final isCurrentPage = pageNum == currentPage;
     
     return InkWell(
       onTap: () {
-        setState(() {
-          currentPage = pageNum;
-        });
+        ref.read(schoolNetProvider.notifier).changePage(pageNum);
       },
       borderRadius: BorderRadius.circular(4),
       child: Container(

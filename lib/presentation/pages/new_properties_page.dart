@@ -1,18 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../widgets/buy_filter_panel.dart';
 import '../widgets/ad_rent_card.dart';
 import '../widgets/property_list_item.dart';
+import '../providers/new_property_provider.dart';
 
 /// 新盘页面
-class NewPropertiesPage extends StatefulWidget {
+class NewPropertiesPage extends ConsumerStatefulWidget {
   const NewPropertiesPage({super.key});
 
   @override
-  State<NewPropertiesPage> createState() => _NewPropertiesPageState();
+  ConsumerState<NewPropertiesPage> createState() => _NewPropertiesPageState();
 }
 
-class _NewPropertiesPageState extends State<NewPropertiesPage> {
+class _NewPropertiesPageState extends ConsumerState<NewPropertiesPage> {
+  @override
+  void initState() {
+    super.initState();
+    // 页面加载时获取新盘数据
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(newPropertyProvider.notifier).loadProperties();
+    });
+  }
+
   String _selectedRegion = '不限';
   String _selectedCategory = '不限';
   String _selectedPrice = '不限';
@@ -24,6 +35,8 @@ class _NewPropertiesPageState extends State<NewPropertiesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final newPropertyState = ref.watch(newPropertyProvider);
+    
     const double maxLeftWidth = 1100.0;
     const double maxRightWidth = 600.0;
     const double maxTotalWidth = maxLeftWidth + maxRightWidth + 16.0;
@@ -88,67 +101,128 @@ class _NewPropertiesPageState extends State<NewPropertiesPage> {
                               }
                             }),
                           ),
-                          Column(
-                            children: [
-                              ListView.builder(
-                                itemCount: 10,
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemBuilder: (context, index) {
-                                  return PropertyListItem(
-                                    data: PropertyCardData(
-                                      imageUrl: 'https://via.placeholder.com/140',
-                                      title: '新盤豪華項目 #${index + 1}',
-                                      district: '港島東',
-                                      estate: '新盤發展',
-                                      location: 'A座 高層',
-                                      area: 850,
-                                      propertyType: '新盤',
-                                      tags: ['5 房', '2 浴室', '海景', '新盤'],
-                                      price: 1850 + (index * 150).toDouble(),
-                                      priceUnit: '万',
-                                    ),
-                                  );
-                                },
+                          // 新盘列表区域
+                          if (newPropertyState.isLoading)
+                            const Padding(
+                              padding: EdgeInsets.all(32.0),
+                              child: Center(
+                                child: CircularProgressIndicator(),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: List.generate(5, (i) {
-                                    final isActive = i == 0;
-                                    return Container(
-                                      width: 36,
-                                      height: 36,
-                                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                                      decoration: BoxDecoration(
-                                        color: isActive ? AppColors.primary : AppColors.background,
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: isActive ? AppColors.primary : AppColors.border,
-                                        ),
-                                      ),
-                                      child: TextButton(
-                                        onPressed: () {},
-                                        style: TextButton.styleFrom(
-                                          padding: EdgeInsets.zero,
-                                          minimumSize: Size.zero,
-                                        ),
-                                        child: Text(
-                                          (i + 1).toString(),
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: isActive ? Colors.white : AppColors.textSecondary,
-                                            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }),
+                            )
+                          else if (newPropertyState.error != null)
+                            Padding(
+                              padding: const EdgeInsets.all(32.0),
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      '加載失敗: ${newPropertyState.error}',
+                                      style: const TextStyle(color: AppColors.error),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton(
+                                      onPressed: () => ref.read(newPropertyProvider.notifier).loadProperties(),
+                                      child: const Text('重試'),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                            )
+                          else if (newPropertyState.response?.properties.isEmpty ?? true)
+                            const Padding(
+                              padding: EdgeInsets.all(32.0),
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.search_off, size: 48, color: AppColors.textSecondary),
+                                    SizedBox(height: 16),
+                                    Text(
+                                      '暫無新盤項目',
+                                      style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          else
+                            Column(
+                              children: [
+                                ListView.builder(
+                                  itemCount: newPropertyState.response!.properties.length,
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemBuilder: (context, index) {
+                                    final property = newPropertyState.response!.properties[index];
+                                    return PropertyListItem(
+                                      data: PropertyCardData(
+                                        imageUrl: property.coverImage ?? 'https://via.placeholder.com/140',
+                                        title: property.name,
+                                        district: property.district?.nameZh ?? '未知地區',
+                                        estate: property.developer,
+                                        location: '共${property.totalUnits}伙',
+                                        area: property.layouts?.isNotEmpty == true 
+                                            ? property.layouts!.first.saleableArea 
+                                            : 0,
+                                        propertyType: '新盤',
+                                        tags: [
+                                          property.status == 'upcoming' ? '即將推出' :
+                                          property.status == 'presale' ? '預售中' :
+                                          property.status == 'selling' ? '銷售中' : '已完成',
+                                          if (property.unitsForSale != null && property.unitsForSale! > 0)
+                                            '${property.unitsForSale}伙在售',
+                                          if (property.primarySchoolNet != null)
+                                            '校網: ${property.primarySchoolNet}',
+                                        ],
+                                        price: 0, // 使用priceRange代替
+                                        priceUnit: property.priceRange,
+                                      ),
+                                    );
+                                  },
+                                ),
+                                // 分页控件
+                                if (newPropertyState.response != null && newPropertyState.response!.totalPages > 1)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        // 上一页按钮
+                                        IconButton(
+                                          icon: const Icon(Icons.chevron_left),
+                                          onPressed: newPropertyState.response!.page > 1
+                                              ? () => ref.read(newPropertyProvider.notifier).changePage(
+                                                    newPropertyState.response!.page - 1,
+                                                  )
+                                              : null,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        // 页码
+                                        Text(
+                                          '${newPropertyState.response!.page} / ${newPropertyState.response!.totalPages}',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        // 下一页按钮
+                                        IconButton(
+                                          icon: const Icon(Icons.chevron_right),
+                                          onPressed: newPropertyState.response!.page < newPropertyState.response!.totalPages
+                                              ? () => ref.read(newPropertyProvider.notifier).changePage(
+                                                    newPropertyState.response!.page + 1,
+                                                  )
+                                              : null,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
                         ],
                       ),
                     ),

@@ -383,3 +383,4 @@ flutter analyze
 - `chore`: 构建/工具相关
 
 示例：`feat(property): add property detail page`
+1.不必生成测试代码和说明文档，除非我指定
