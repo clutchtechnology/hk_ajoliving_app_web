@@ -43,11 +43,11 @@ RUN chmod -R 755 /usr/share/nginx/html && \
     test -f /usr/share/nginx/html/index.html || (echo "Error: index.html not found!" && exit 1)
 
 # 暴露端口
-EXPOSE 80
+EXPOSE 8080
 
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
 
 # 启动 nginx
 CMD ["nginx", "-g", "daemon off;"]
