@@ -13,7 +13,6 @@ import '../presentation/pages/school_net_page.dart';
 import '../presentation/pages/agents_page.dart';
 import '../presentation/pages/auth/login_page.dart';
 import '../presentation/pages/profile_page.dart';
-import '../presentation/pages/favorites_page.dart';
 import '../presentation/widgets/placeholder_page.dart';
 
 /// 应用路由配置
@@ -130,10 +129,13 @@ final GoRouter appRouter = GoRouter(
           builder: (context, state) => const ProfilePage(),
         ),
 
-        // 收藏
+        // 购物车
         GoRoute(
-          path: '/favorites',
-          builder: (context, state) => const FavoritesPage(),
+          path: '/cart',
+          builder: (context, state) => const PlaceholderPage(
+            title: '購物車',
+            icon: Icons.shopping_cart,
+          ),
         ),
 
         // 登录

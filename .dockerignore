@@ -49,9 +49,6 @@ azure-pipelines.yml
 # 依赖管理
 pubspec.lock
 
-# Web 构建产物（避免重复）
-web/
-
 # Android/iOS 相关（Web 项目不需要）
 android/
 ios/
