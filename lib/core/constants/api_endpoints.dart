@@ -1,7 +1,7 @@
 /// API 端点常量
 class ApiEndpoints {
   // 基础 URL（根据环境配置）
-  static const String baseUrl = 'http://localhost:8080';
+  static const String baseUrl = 'https://ajoliving-api.zeabur.app';
   
   // API 版本前缀
   static const String apiV1 = '/api/v1';
